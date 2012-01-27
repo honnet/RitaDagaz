@@ -1,0 +1,40 @@
+Welcome to the resbala project !
+
+
+Presentation
+============
+
+In this project, the idea is to make a physical picture interactive.
+A schema is given in resbala.pdf but here is are a few explanations :
+
+We have twice the same picture, one is cut in bands vertically, the other
+horizontally.
+The bands are weaved as in a banana leaf roof, the vertical bands are fixed,
+the others bands are attached to tubes to be able to slide horizonally.
+The left tube rotate due to the motor below, the right tube rotate due to a
+belt connected to the motor.
+The motor is controlled by an arduino which receives its data from an
+ultrasonic sensor to detect the position of a visitor.
+If a visitor is on the left side of the piece of art, the horizontal bands
+will slide to the left, and vice versa.
+
+
+Utilization
+===========
+
+In this project we used 2 libraries that are not always in the arduino
+environment, it's already in the repository but here are the sources:
+http://arduino.cc/playground/Code/Ping 
+http://arduino.cc/playground/Main/RunningMedian
+
+# To use them, go in the libraries folder of your arduino install :
+cd /opt/arduino/libraries/              # adapt this line to your case
+
+# and make links:
+SKETCH_FOLDER=$HOME/sketchbook/         # adapt this too
+ln -s $SKETCH_FOLDER/RitaDagaz/libraries/Ping/
+ln -s $SKETCH_FOLDER/RitaDagaz/libraries/RunningMedian/
+
+
+Enjoy ;)
+
