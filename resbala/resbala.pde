@@ -3,13 +3,14 @@
 // to use these custom libraries check the README file for advices.
 #include <Servo.h> 
 
-//#define DEBUG
+#define DEBUG
 
 const int SONAR_PIN = A0;
 const int SERVO_PIN = 9;
 Ping ping = Ping(SONAR_PIN);
 RunningMedian samples = RunningMedian();
 Servo myservo;
+bool stopPrint = false;
 
 
 void setup() {
@@ -22,33 +23,45 @@ void setup() {
 
 void loop()
 {
-  int cm, cm_raw, cm_old=0;
-  const float COEF = 0.5;
+  const float COEF = 0.3;
+  const int DIST_MAX = 120;           // number of cm that we can measure
+  float cm, cm_old=DIST_MAX/2;
+  int angle;
 
   ping.fire();
-  cm_raw = ping.centimeters();    // get distance
-  
-  samples.add(cm_raw);
-  cm = samples.getMedian();       // median filter output
+  cm = ping.centimeters();              // get distance
 
-  cm = (cm<0)? cm_old : cm;       // keep old value if error
-  cm = constrain(cm, 0, 150);     // saturate to 1m50
-  cm = map(cm, 0,150 , 0,360);    // convert from distance to angle
-  cm = cm*COEF + cm_old*(1-COEF); // smooth with a simple low pass filter
-  cm_old = cm;                    // save old value
+  //if (cm<0) cm = cm_old;                // keep old value if error
+  cm = constrain(cm, 0, DIST_MAX);      // saturate to a reliable distance
 
-  myservo.write(cm);              // set motor position
+  samples.add(cm);                      // median filter input
+  cm = samples.getMedian();             // median filter output
+
+  cm = cm*COEF + cm_old*(1-COEF);       // smooth with a simple low pass filter
+  cm_old = cm;                          // save old value
+
+  angle = map(cm, 0,DIST_MAX , 0,360);  // convert from distance to angle
+  myservo.write(angle);                 // set motor position
 
 #ifdef DEBUG
-  Serial.print(cm);
-  Serial.print("cm\t");
+  char received = Serial.read();        // get -1 if empty
+  if (received == '0') stopPrint = true;
+  if (received == '1') stopPrint = false;
 
-  for (int i=0; i<cm/4; i++)
-    Serial.print("*");
-  Serial.println();
+  if (stopPrint == false)
+  {
+    Serial.print(cm);
+    Serial.print("cm\t");
+
+    //for (int i=0; i<cm/2; i++)
+    for (int i=0; i<angle/2; i++)
+      Serial.print("*");
+
+    Serial.println();
+  }
 #endif
 
-  delay(30);
+  delay(20);
 }
 
 
