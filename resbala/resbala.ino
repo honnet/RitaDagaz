@@ -3,35 +3,45 @@
 // to use these custom libraries check the README file for advices.
 #include <Servo.h> 
 
-#define DEBUG
 
 const int SONAR_PIN = A0;
 const int SERVO_PIN = 9;
+const int DIST_MAX = 120;
+
 Ping ping = Ping(SONAR_PIN);
-RunningMedian samples = RunningMedian();
+RunningMedian samples;
 Servo myservo;
-bool stopPrint = false;
 
 
 void setup() {
+  samples = RunningMedian();
   myservo.attach(SERVO_PIN);
-#ifdef DEBUG
-  Serial.begin(115200);
-#endif
 }
 
 
 void loop()
 {
-  const float COEF = 0.3;
-  const int DIST_MAX = 120;           // number of cm that we can measure
-  float cm, cm_old=DIST_MAX/2;
   int angle;
+  float cm;
 
   ping.fire();
   cm = ping.centimeters();              // get distance
+  cm = dist_process(cm);                // multiple filters
 
-  //if (cm<0) cm = cm_old;                // keep old value if error
+  angle = map(cm, 0,DIST_MAX , 0,180);  // convert from distance to angle
+  angle = angle_process(angle);         // limit speed of motor
+  myservo.write(angle);                 // set motor position
+
+  delay(5);
+}
+
+
+int dist_process(int cm)
+{
+  const float COEF = 0.1;
+  static float cm_old = DIST_MAX;       // max number of cm that we can measure
+
+  if (cm<0) cm = cm_old;                // keep old value if error
   cm = constrain(cm, 0, DIST_MAX);      // saturate to a reliable distance
 
   samples.add(cm);                      // median filter input
@@ -39,29 +49,22 @@ void loop()
 
   cm = cm*COEF + cm_old*(1-COEF);       // smooth with a simple low pass filter
   cm_old = cm;                          // save old value
-
-  angle = map(cm, 0,DIST_MAX , 0,360);  // convert from distance to angle
-  myservo.write(angle);                 // set motor position
-
-#ifdef DEBUG
-  char received = Serial.read();        // get -1 if empty
-  if (received == '0') stopPrint = true;
-  if (received == '1') stopPrint = false;
-
-  if (stopPrint == false)
-  {
-    Serial.print(cm);
-    Serial.print("cm\t");
-
-    //for (int i=0; i<cm/2; i++)
-    for (int i=0; i<angle/2; i++)
-      Serial.print("*");
-
-    Serial.println();
-  }
-#endif
-
-  delay(20);
+  return cm;
 }
 
 
+int angle_process(int angle)
+{
+  const int ANGLE_MAX_DIFF = 1;
+  static int angle_old = angle;
+
+  int diff = angle - angle_old;         // get the difference
+  int abs_diff = abs(diff);             // ...its absolute value
+  int sign = (diff<0)? -1 : 1;          // ...and its sign
+  
+  if (abs_diff>ANGLE_MAX_DIFF)          // avoid changing the angle too quickly
+    angle = angle_old + ANGLE_MAX_DIFF*sign;
+
+  angle_old = angle;
+  return angle;
+}
