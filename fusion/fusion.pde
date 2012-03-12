@@ -6,9 +6,11 @@ A center mouse click brings back to the masterpiece.
 */
 
 PImage left, center, right, current;
-int X_OFFSET, Y_OFFSET;
 int wheelCnt=0, wheelCntBak=0;
 final boolean applet=false;
+int X_OFFSET, Y_OFFSET;
+int WIDTH, HEIGHT;
+
 
 void setup()
 {
@@ -18,18 +20,21 @@ void setup()
 
   if (applet)
   {
-    size(1024, 715); // image size
+    WIDTH = 1024;
+    HEIGHT = 715;
     // offsets calculations to center the image correctly:
     X_OFFSET = 0;
     Y_OFFSET = 0;
   }
   else
   {
-    size(screen.width, screen.height);  // full screen
+    WIDTH = screen.width;
+    HEIGHT = screen.height;
     // offsets calculations to center the image correctly:
     X_OFFSET = (screen.width  - center.width )/2;
     Y_OFFSET = (screen.height - center.height)/2;
   }
+  size(WIDTH, HEIGHT); // image size
 
   background(0);                      // black
   image(center, X_OFFSET, Y_OFFSET);  // start with center image
@@ -45,13 +50,11 @@ void draw()
 {
   if (wheelCntBak != wheelCnt)
   {
-    println(wheelCnt); // TODO remove
-
     // save new value:
     wheelCntBak = wheelCnt;
 
     // background image:
-    image(center, X_OFFSET, Y_OFFSET);
+    image(center, X_OFFSET,Y_OFFSET);
 
     // display another faded image only if not on the center:
     if (wheelCnt != 0)
@@ -59,7 +62,7 @@ void draw()
       tint(255, abs(wheelCnt)); // set transparency
 
       current = (wheelCnt<0)? left : right;
-      image(current, X_OFFSET, Y_OFFSET);
+      image(current, X_OFFSET,Y_OFFSET);
     }
   }
 
