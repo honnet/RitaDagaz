@@ -6,22 +6,22 @@ A center mouse click brings back to the masterpiece.
 */
 
 PImage left, center, right, current;
-int wheelCnt=0, wheelCntBak=0;
-final boolean applet=false;
+int wheelCnt = 0, wheelCntBak = 0;
+final boolean export = false;
 int X_OFFSET, Y_OFFSET;
 int WIDTH, HEIGHT;
 
 
 void setup()
 {
-  left    = loadImage("left.jpg");    // a layer of the masterpiece
-  center  = loadImage("center.jpg");  // THE masterpiece
-  right   = loadImage("right.jpg");   // another layer
+  left   = loadImage("left.jpg");    // a layer of the masterpiece
+  center = loadImage("center.jpg");  // THE masterpiece
+  right  = loadImage("right.jpg");   // another layer
 
-  if (applet)
+  if (export)
   {
-    WIDTH = 1024;
-    HEIGHT = 715;
+    WIDTH = 1024; // TODO : change with screen size !!
+    HEIGHT = 715; // TODO : change with screen size !!
     // offsets calculations to center the image correctly:
     X_OFFSET = 0;
     Y_OFFSET = 0;
