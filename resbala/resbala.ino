@@ -3,6 +3,12 @@
 // to use these custom libraries check the README file for advices.
 #include <Servo.h> 
 
+/*
+WARNING:
+ - use a 7.5V with 2amp power supply
+ - Vin of arduino => Vcc of motor
+ - 5V  of arduino => Vcc of sensor 
+*/
 
 const int SONAR_PIN = A0;
 const int SERVO_PIN = 9;
@@ -32,13 +38,13 @@ void loop()
   angle = angle_process(angle);         // limit speed of motor
   myservo.write(angle);                 // set motor position
 
-  delay(5);
+  delay(1);
 }
 
 
 int dist_process(int cm)
 {
-  const float COEF = 0.1;
+  const float COEF = 0.6;
   static float cm_old = DIST_MAX;       // max number of cm that we can measure
 
   if (cm<0) cm = cm_old;                // keep old value if error
@@ -55,7 +61,7 @@ int dist_process(int cm)
 
 int angle_process(int angle)
 {
-  const int ANGLE_MAX_DIFF = 1;
+  const int ANGLE_MAX_DIFF = 3;
   static int angle_old = angle;
 
   int diff = angle - angle_old;         // get the difference
